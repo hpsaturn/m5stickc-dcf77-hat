@@ -16,7 +16,7 @@ DCF77 DCF = DCF77(DCF_PIN,DCF_INTERRUPT, true);
 #define BRIGHT_SIZE 5
 
 int backlight[BRIGHT_SIZE] = {5, 15, 30, 50, 70};
-int brightness = 2;  // MAX: BRIGHT_SIZE
+int brightness = 1;  // MAX: BRIGHT_SIZE
 
 void setup() {
   Serial.begin(115200);
