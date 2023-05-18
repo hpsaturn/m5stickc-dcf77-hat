@@ -14,31 +14,50 @@
 DCF77 DCF = DCF77(DCF_PIN,DCF_INTERRUPT, true);
 
 #define BRIGHT_SIZE 5
-
 int backlight[BRIGHT_SIZE] = {5, 15, 30, 50, 70};
 int brightness = 1;  // MAX: BRIGHT_SIZE
 
+#define DATEPOSY 20
+#define DATEPOSX 50
+#define DATEHIGH 25
+#define DATEMARG 20
+#define SIGNPOSX 60
+#define SIGNMARG 2
+
 class mDCF77EventsCallback : public DCF77EventsCallback {
-    void onSignal(unsigned char signal){
-      Serial.print(signal);
-    };
-    void onBufferMsg(const char * msg){
-      Serial.println(msg);
-    };
-    void onGetTime(){
+  void onSignal(unsigned char signal) {
+    Serial.print(signal);
+  };
+  void onBufferMsg(const char* msg) {
+    Serial.println(msg);
+  };
+  void onGetTime(){
 
-    };
-    void onParityError(){
+  };
+  void onParityError(){
 
-    };
+  };
 };
+
+void displayLoop() {
+  static uint_fast64_t tts = 0;  // timestamp for GUI refresh
+  if (millis() - tts > 1000) {
+    tts = millis(); 
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(DATEPOSX, DATEPOSY);
+    M5.Lcd.fillRect(DATEPOSX, DATEPOSY, 60, DATEHIGH, BLACK);
+    M5.Lcd.print(year());
+    M5.Lcd.setCursor(DATEMARG, DATEPOSY+DATEHIGH);
+    M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH, M5.Lcd.width() - DATEMARG, DATEHIGH, BLACK);
+    M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
+  }
+}
 
 void setup() {
   Serial.begin(115200);
   M5.begin();
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.setTextSize(2);
   M5.Axp.ScreenBreath(backlight[brightness]);
 
   delay(200);
@@ -71,19 +90,6 @@ void buttonLoop(){
   if (M5.BtnA.wasReleased()) {  // If the button A is pressed.
     if (brightness++ >= BRIGHT_SIZE-1) brightness = 0;
     M5.Axp.ScreenBreath(backlight[brightness]);
-  }
-}
-
-void displayLoop() {
-  static uint_fast64_t tts = 0;  // timestamp for GUI refresh
-  if (millis() - tts > 1000) {
-    tts = millis(); 
-    M5.Lcd.setCursor(50, 80);
-    M5.Lcd.fillRect(50, 80, 60, 25, BLACK);
-    M5.Lcd.print(year());
-    M5.Lcd.setCursor(20, 105);
-    M5.Lcd.fillRect(20, 105, M5.Lcd.width() - 20, 25, BLACK);
-    M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
   }
 }
 
