@@ -1,6 +1,6 @@
 # M5StickC DCF77 HAT
 
-Basic hat implementation of a DCF77 receiver for M5StickC-Plus or compatible ESP32 devices.
+Basic hat implementation of a DCF77 receiver for M5StickC-Plus or compatible ESP32 devices. This firmware uses a improvement of Arduino-DCF77 library, it is using events callback to improve the GUI and signal representation.
 
 ## Device
 
@@ -15,14 +15,22 @@ The current firmware was tested on 77.5KHZ single frequency device. It is the 4 
 | 3.3v | VDD | Positive (3.3v) |
 | GND  | GND | Ground / unlabeled pin |
 
+(see the photos in [Thingiverse](https://www.thingiverse.com/thing:6033436))
+
 ## Usage
 
-Some tips for this working:
+**Some tips:**  
 
 - [x] check the right device. Some devices has different frequencies for each country.
 - [x] Try to remove the device from any radio or wireless intereference or noise. The radio is very susceptible to noise.
 - [x] In indoors works, but is possible that in some builds doesn't. Try in outdoors first
 - [x] the position of the device for me was important, in horizontal is possible that it works better
+
+**Buttons:**
+
+- Left button: Power ON/Off
+- M5 Button: Backlight or brightness toggle
+- Right button: Unimplementened  
 
 ## Box
 
@@ -31,5 +39,15 @@ Is a basic box - hat for these devices, for example M5StickC or M5StickC-Plus, a
 ![Box DCF77 M5StickCPlus Hat](box/collage.jpg)
 
 **Files:**  
+
 ![DCF77 box base](box/dfc77_holder_vertical.stl)  
-![DCF77 box lid](box/dfc77_holder_vertical_lid.stl)
+![DCF77 box lid](box/dfc77_holder_vertical_lid.stl)  
+
+Also in [Thingiverse](https://www.thingiverse.com/thing:6033436).  
+
+---
+
+## Credits
+
+https://github.com/thijse/Arduino-DCF77 (Old library)  
+https://www.seikowatches.com/instructions/html/SEIKO_8B92_EN/CWVVSYxxhbpilh
