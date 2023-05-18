@@ -42,9 +42,19 @@ void updateField(int posx, int posy, int w, int h, uint16_t color) {
 
 void printStatus(const char* msg) {
   M5.Lcd.setTextSize(1);
-  updateField(INFOMARG, INFOPOSY-5, TFT_WIDTH, DATEHIGH+5, TFT_WHITE);
-  M5.Lcd.setTextDatum(CC_DATUM); 
-  M5.Lcd.drawString(String(msg),TFT_WIDTH/2, INFOPOSY);
+  updateField(0, INFOPOSY - 6, TFT_WIDTH, DATEHIGH + 5, TFT_WHITE);
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.drawString(String(msg), TFT_WIDTH / 2, INFOPOSY);
+}
+
+void printBuffer(const char* msg, uint16_t color) {
+  updateField(INFOMARG, INFOPOSY + DATEHIGH + 7, 60, DATEHIGH, color);
+  M5.Lcd.printf("B:%s", msg);
+}
+
+void printParity(const char* msg, uint16_t color) {
+  updateField(TFT_WIDTH - 60, INFOPOSY + DATEHIGH + 7, 60, DATEHIGH, color);
+  M5.Lcd.printf("P:%s", msg);
 }
 
 class mDCF77EventsCallback : public DCF77EventsCallback {
@@ -61,17 +71,13 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
     signalpos = SIGNMARG;
     M5.Lcd.setTextSize(2);
     if (String(msg) == "EoM") {
-      updateField(INFOMARG, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_RED);
-      M5.Lcd.printf("B:%s", msg);
-      updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_CYAN);
-      M5.Lcd.printf("P:Ukn");
+      printBuffer(msg, TFT_RED);
+      printParity("Ukn", TFT_CYAN);
       printStatus("Decoding..");
       bandposy = SIGNPOSY;
     } else if (String(msg) == "BF") {
-      updateField(INFOMARG, INFOPOSY+DATEHIGH+6, TFT_WIDTH, DATEHIGH, TFT_WHITE);
-      M5.Lcd.printf("B:%s", msg);
-      updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_GREEN);
-      M5.Lcd.printf("P:Ok");
+      printBuffer(msg,TFT_WHITE);
+      printParity("Ok", TFT_WHITE);
       bandposy = bandposy + SIGNHIGH + 3;
       if (bandposy >= (SIGNPOSY + (SIGNHIGH + 3) * MAXBANDS)) {
         bandposy = SIGNPOSY;
@@ -83,7 +89,7 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
     printStatus(msg);
   };
   void onParityError() {
-    updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+6, 60, DATEHIGH, TFT_CYAN);
+    updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_CYAN);
     M5.Lcd.printf("P:Err");
   };
 };
