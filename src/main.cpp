@@ -85,6 +85,13 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
     }
     M5.Lcd.fillRect(SIGNMARG, bandposy, 121, SIGNHIGH, BLACK);
   };
+  void onTimeUpdate(time_t DCFtime) {
+    Serial.println("Time is updated");
+    setTime(DCFtime);
+    M5.Lcd.setTextSize(2);
+    updateField(DATEMARG, DATEPOSY + DATEHIGH * 2, M5.Lcd.width() - DATEMARG, DATEHIGH, TFT_YELLOW);
+    M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
+  };
   void onTimeUpdateMsg(const char* msg){
     printStatus(msg);
   };
@@ -106,21 +113,6 @@ void displayLoop() {
     M5.Lcd.setCursor(DATEMARG, DATEPOSY+DATEHIGH);
     M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH, M5.Lcd.width() - DATEMARG, DATEHIGH, BLACK);
     M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
-  }
-}
-
-void dfcLoop() {
-  static uint_fast64_t dts = 0;  // timestamp for DCF77 refresh
-  if (millis() - dts > 1000) {
-    dts = millis();
-    time_t DCFtime = DCF.getTime();  // Check if new DCF77 time is available
-    if (DCFtime != 0) {
-      Serial.println("Time is updated");
-      setTime(DCFtime);
-      M5.Lcd.setTextSize(2);
-      updateField(DATEMARG, DATEPOSY+DATEHIGH*2, M5.Lcd.width() - DATEMARG, DATEHIGH, TFT_YELLOW);
-      M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second()); 
-    }
   }
 }
 
@@ -179,7 +171,6 @@ void printClock() {
 }
 
 void loop() {
-  dfcLoop();
   buttonLoop();
   displayLoop();
   delay(80);
