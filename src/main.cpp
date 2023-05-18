@@ -18,6 +18,21 @@ DCF77 DCF = DCF77(DCF_PIN,DCF_INTERRUPT, true);
 int backlight[BRIGHT_SIZE] = {5, 15, 30, 50, 70};
 int brightness = 1;  // MAX: BRIGHT_SIZE
 
+class mDCF77EventsCallback : public DCF77EventsCallback {
+    void onSignal(unsigned char signal){
+      Serial.print(signal);
+    };
+    void onBufferMsg(const char * msg){
+      Serial.println(msg);
+    };
+    void onGetTime(){
+
+    };
+    void onParityError(){
+
+    };
+};
+
 void setup() {
   Serial.begin(115200);
   M5.begin();
@@ -33,6 +48,7 @@ void setup() {
   pinMode(DCF77_PON_PIN, OUTPUT);
   digitalWrite(DCF77_PON_PIN, LOW);
 
+  DCF.setCallBack(new mDCF77EventsCallback());
   DCF.Start();
   Serial.println("Waiting for DCF77 time ... ");
   Serial.println("It will take at least 2 minutes until a first update can be processed.");
@@ -61,18 +77,7 @@ void buttonLoop(){
 void displayLoop() {
   static uint_fast64_t tts = 0;  // timestamp for GUI refresh
   if (millis() - tts > 1000) {
-    tts = millis();
-    // digital clock display of the time
-    // Serial.print(hour());
-    // printDigits(minute());
-    // printDigits(second());
-    // Serial.print(" ");
-    // Serial.print(day());
-    // Serial.print(" ");
-    // Serial.print(month());
-    // Serial.print(" ");
-    // Serial.print(year());
-    // Serial.println();
+    tts = millis(); 
     M5.Lcd.setCursor(50, 80);
     M5.Lcd.fillRect(50, 80, 60, 25, BLACK);
     M5.Lcd.print(year());
@@ -87,6 +92,20 @@ void printDigits(int digits){
   Serial.print(":");
   if(digits < 10) Serial.print('0');
   Serial.print(digits);
+}
+
+void printClock() {
+  // digital clock display of the time
+  Serial.print(hour());
+  printDigits(minute());
+  printDigits(second());
+  Serial.print(" ");
+  Serial.print(day());
+  Serial.print(" ");
+  Serial.print(month());
+  Serial.print(" ");
+  Serial.print(year());
+  Serial.println();
 }
 
 void loop() {
