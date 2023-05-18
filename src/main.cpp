@@ -1,63 +1,23 @@
 #include <Arduino.h>
-#include <M5StickCPlus.h>
 #include <DCF77.h>
 #include <RTClib.h>
+#include "gui.h"
 
-//#define BLINK_PIN 19        // Led pin
-#define DCF77_PON_PIN 0    // DCF77 operation pin
-//#define DCF77_OUT_PIN 27    // DCF77 output pin
-
-
-#define DCF_PIN 26	       // Connection pin to DCF 77 device
+#define DCF77_PON_PIN 0     // DCF77 operation pin
+#define DCF_PIN 26	        // Connection pin to DCF 77 device
 #define DCF_INTERRUPT 26    // Interrupt number associated with pin
 
-DCF77 DCF = DCF77(DCF_PIN,DCF_INTERRUPT, true);
+DCF77 DCF = DCF77(DCF_PIN, DCF_INTERRUPT, true);
 
 #define BRIGHT_SIZE 5
 int backlight[BRIGHT_SIZE] = {5, 15, 30, 50, 70};
-int brightness = 1;  // MAX: BRIGHT_SIZE
+int brightness = 1;        // MAX brightness is BRIGHT_SIZE
 
-#define DATEPOSY 12
-#define DATEPOSX 50
-#define DATEHIGH 22
-#define DATEMARG 20
-
-#define INFOPOSY 95
-#define INFOMARG 5
-
-#define SIGNPOSY 150
-#define SIGNMARG 6
-#define SIGNHIGH 25
-
-#define MAXBANDS 3
-
-int signalpos = SIGNMARG;
-int bandposy = SIGNPOSY;
-
-void updateField(int posx, int posy, int w, int h, uint16_t color) {
-  M5.Lcd.setCursor(posx, posy);
-  M5.Lcd.fillRect(posx, posy, w, h, BLACK);
-  M5.Lcd.setTextColor(color);
-}
-
-void printStatus(const char* msg) {
-  M5.Lcd.setTextSize(1);
-  updateField(0, INFOPOSY - 6, TFT_WIDTH, DATEHIGH + 5, TFT_WHITE);
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.drawString(String(msg), TFT_WIDTH / 2, INFOPOSY);
-}
-
-void printBuffer(const char* msg, uint16_t color) {
-  updateField(INFOMARG, INFOPOSY + DATEHIGH + 7, 60, DATEHIGH, color);
-  M5.Lcd.printf("B:%s", msg);
-}
-
-void printParity(const char* msg, uint16_t color) {
-  updateField(TFT_WIDTH - 60, INFOPOSY + DATEHIGH + 7, 60, DATEHIGH, color);
-  M5.Lcd.printf("P:%s", msg);
-}
+int signalpos = SIGNMARG;  // signal bar position
+int bandposy = SIGNPOSY;   // signals band position
 
 class mDCF77EventsCallback : public DCF77EventsCallback {
+
   void onSignal(unsigned char signal) {
     Serial.print(signal);
     if (signal == 0)
@@ -66,6 +26,7 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
       M5.Lcd.fillRect(signalpos, bandposy, 2, SIGNHIGH, TFT_GREEN);
     signalpos = signalpos + 2;
   };
+
   void onBufferMsg(const char* msg) {
     Serial.println(msg);
     signalpos = SIGNMARG;
@@ -85,36 +46,22 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
     }
     M5.Lcd.fillRect(SIGNMARG, bandposy, 121, SIGNHIGH, BLACK);
   };
+
   void onTimeUpdate(time_t DCFtime) {
     Serial.println("Time is updated");
     setTime(DCFtime);
-    M5.Lcd.setTextSize(2);
-    updateField(DATEMARG, DATEPOSY + DATEHIGH * 2, M5.Lcd.width() - DATEMARG, DATEHIGH, TFT_YELLOW);
-    M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
+    printTime(DATEPOSY + DATEHIGH * 2, TFT_YELLOW);
   };
+
   void onTimeUpdateMsg(const char* msg){
     printStatus(msg);
   };
+
   void onParityError() {
     updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_CYAN);
     M5.Lcd.printf("P:Err");
   };
 };
-
-void displayLoop() {
-  static uint_fast64_t tts = 0;  // timestamp for GUI refresh
-  if (millis() - tts > 1000) {
-    tts = millis(); 
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(DATEPOSX, DATEPOSY);
-    M5.Lcd.setTextColor(TFT_WHITE);
-    M5.Lcd.fillRect(DATEPOSX, DATEPOSY, 60, DATEHIGH, BLACK);
-    M5.Lcd.print(year());
-    M5.Lcd.setCursor(DATEMARG, DATEPOSY+DATEHIGH);
-    M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH, M5.Lcd.width() - DATEMARG, DATEHIGH, BLACK);
-    M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
-  }
-}
 
 void setup() {
   Serial.begin(115200);
@@ -138,7 +85,8 @@ void setup() {
   Serial.println("Waiting for DCF77 time ... ");
   Serial.println("It will take at least 2 minutes until a first update can be processed.");
   delay(100);
-  printStatus("Decoding..");
+  // printStatus("Decoding..");
+  printStatus("Esto es una preuba de caracteres");
 }
 
 void buttonLoop(){
@@ -149,30 +97,9 @@ void buttonLoop(){
   }
 }
 
-void printDigits(int digits){
-  // utility function for digital clock display: prints preceding colon and leading 0
-  Serial.print(":");
-  if(digits < 10) Serial.print('0');
-  Serial.print(digits);
-}
-
-void printClock() {
-  // digital clock display of the time
-  Serial.print(hour());
-  printDigits(minute());
-  printDigits(second());
-  Serial.print(" ");
-  Serial.print(day());
-  Serial.print(" ");
-  Serial.print(month());
-  Serial.print(" ");
-  Serial.print(year());
-  Serial.println();
-}
-
 void loop() {
   buttonLoop();
-  displayLoop();
+  timeLoop();
   delay(80);
 }
 
