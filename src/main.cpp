@@ -21,15 +21,33 @@ int brightness = 1;  // MAX: BRIGHT_SIZE
 #define DATEPOSX 50
 #define DATEHIGH 25
 #define DATEMARG 20
-#define SIGNPOSX 60
+
+#define SIGNPOSY 70
 #define SIGNMARG 2
+#define SIGNHIGH 30
+
+int signalpos = SIGNMARG;
+int bandposy = SIGNPOSY;
 
 class mDCF77EventsCallback : public DCF77EventsCallback {
   void onSignal(unsigned char signal) {
     Serial.print(signal);
+    if (signal == 0)
+      M5.Lcd.fillRect(signalpos,bandposy,2,SIGNHIGH,TFT_DARKGREY);
+    else
+      M5.Lcd.fillRect(signalpos,bandposy,2,SIGNHIGH,TFT_GREEN);
+    signalpos = signalpos + 2;
   };
   void onBufferMsg(const char* msg) {
     Serial.println(msg);
+    signalpos = SIGNMARG;
+    if (String(msg)=="EoM"){
+      M5.Lcd.fillRect(SIGNMARG, bandposy, 121, SIGNHIGH, BLACK);
+      bandposy = SIGNPOSY;
+    }
+    else {
+      bandposy = bandposy + SIGNHIGH + 3;
+    }
   };
   void onGetTime(){
 
@@ -71,6 +89,7 @@ void setup() {
   DCF.Start();
   Serial.println("Waiting for DCF77 time ... ");
   Serial.println("It will take at least 2 minutes until a first update can be processed.");
+  delay(100);
 }
 
 void dfcLoop() {
@@ -115,9 +134,10 @@ void printClock() {
 }
 
 void loop() {
-  buttonLoop();
   dfcLoop();
+  buttonLoop();
   displayLoop();
+  delay(80);
 }
 
 
