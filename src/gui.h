@@ -14,7 +14,7 @@
 
 #define MAXBANDS 3
 
-void updateField(int posx, int posy, int w, int h, uint16_t color) {
+void updateField(int32_t posx, int32_t posy, int32_t w, int32_t h, uint16_t color) {
   M5.Lcd.setCursor(posx, posy);
   M5.Lcd.fillRect(posx, posy, w, h, BLACK);
   M5.Lcd.setTextColor(color);
@@ -41,9 +41,9 @@ void printStatus(const char* msg) {
         found++;
       }
     }
-    int splitpos = ceil(found / 2) + 1;
+    int splitpos = ceil(found / 2);
     M5.Lcd.drawString(input.substring(0, strIndex[splitpos]), TFT_WIDTH / 2, INFOPOSY);
-    M5.Lcd.drawString(input.substring(strIndex[splitpos], maxIndex), TFT_WIDTH / 2, INFOPOSY + 9);
+    M5.Lcd.drawString(input.substring(strIndex[splitpos]), TFT_WIDTH / 2, INFOPOSY + 9);
   }
 }
 
@@ -65,7 +65,7 @@ void printYear() {
   M5.Lcd.drawString(String(year()), TFT_WIDTH/2, DATEPOSY);
 }
 
-void printTime(int posy, uint16_t color) {
+void printTime(int32_t posy, uint16_t color) {
   M5.Lcd.setTextSize(2);
   updateField(DATEMARG, posy, M5.Lcd.width() - DATEMARG, DATEHIGH, color);
   M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
@@ -90,13 +90,4 @@ void printClock() {
   Serial.print(" ");
   Serial.print(year());
   Serial.println();
-}
-
-void timeLoop() {
-  static uint_fast64_t tts = 0;  // timestamp for GUI refresh
-  if (millis() - tts > 1000) {
-    tts = millis(); 
-    printYear();
-    printTime(DATEPOSY + DATEHIGH, TFT_WHITE);
-  }
 }

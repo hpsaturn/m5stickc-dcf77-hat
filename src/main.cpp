@@ -47,12 +47,6 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
     M5.Lcd.fillRect(SIGNMARG, bandposy, 121, SIGNHIGH, BLACK);
   };
 
-  void onTimeUpdate(time_t DCFtime) {
-    Serial.println("Time is updated");
-    setTime(DCFtime);
-    printTime(DATEPOSY + DATEHIGH * 2, TFT_YELLOW);
-  };
-
   void onTimeUpdateMsg(const char* msg){
     printStatus(msg);
   };
@@ -62,6 +56,21 @@ class mDCF77EventsCallback : public DCF77EventsCallback {
     M5.Lcd.printf("P:Err");
   };
 };
+
+void dcfLoop() {
+  static uint_fast64_t tts = 0;  // timestamp for GUI refresh
+  if (millis() - tts > 1000) {
+    tts = millis();
+    time_t DCFtime = DCF.getTime();  // Check if new DCF77 time is available
+    if (DCFtime != 0) {
+      Serial.println("Time is updated");
+      setTime(DCFtime);
+      printTime(DATEPOSY + DATEHIGH * 2, TFT_YELLOW);
+    }
+    printYear();
+    printTime(DATEPOSY + DATEHIGH, TFT_WHITE);
+  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -85,8 +94,7 @@ void setup() {
   Serial.println("Waiting for DCF77 time ... ");
   Serial.println("It will take at least 2 minutes until a first update can be processed.");
   delay(100);
-  // printStatus("Decoding..");
-  printStatus("Esto es una preuba de caracteres");
+  printStatus("It will take at least 2 minutes");
 }
 
 void buttonLoop(){
@@ -99,7 +107,7 @@ void buttonLoop(){
 
 void loop() {
   buttonLoop();
-  timeLoop();
+  dcfLoop();
   delay(80);
 }
 
