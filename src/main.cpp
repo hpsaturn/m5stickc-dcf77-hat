@@ -17,43 +17,74 @@ DCF77 DCF = DCF77(DCF_PIN,DCF_INTERRUPT, true);
 int backlight[BRIGHT_SIZE] = {5, 15, 30, 50, 70};
 int brightness = 1;  // MAX: BRIGHT_SIZE
 
-#define DATEPOSY 20
+#define DATEPOSY 12
 #define DATEPOSX 50
-#define DATEHIGH 25
+#define DATEHIGH 22
 #define DATEMARG 20
 
-#define SIGNPOSY 70
-#define SIGNMARG 2
-#define SIGNHIGH 30
+#define INFOPOSY 95
+#define INFOMARG 5
+
+#define SIGNPOSY 150
+#define SIGNMARG 6
+#define SIGNHIGH 25
+
+#define MAXBANDS 3
 
 int signalpos = SIGNMARG;
 int bandposy = SIGNPOSY;
+
+void updateField(int posx, int posy, int w, int h, uint16_t color) {
+  M5.Lcd.setCursor(posx, posy);
+  M5.Lcd.fillRect(posx, posy, w, h, BLACK);
+  M5.Lcd.setTextColor(color);
+}
+
+void printStatus(const char* msg) {
+  M5.Lcd.setTextSize(1);
+  updateField(INFOMARG, INFOPOSY-5, TFT_WIDTH, DATEHIGH+5, TFT_WHITE);
+  M5.Lcd.setTextDatum(CC_DATUM); 
+  M5.Lcd.drawString(String(msg),TFT_WIDTH/2, INFOPOSY);
+}
 
 class mDCF77EventsCallback : public DCF77EventsCallback {
   void onSignal(unsigned char signal) {
     Serial.print(signal);
     if (signal == 0)
-      M5.Lcd.fillRect(signalpos,bandposy,2,SIGNHIGH,TFT_DARKGREY);
+      M5.Lcd.fillRect(signalpos, bandposy, 2, SIGNHIGH, TFT_DARKGREY);
     else
-      M5.Lcd.fillRect(signalpos,bandposy,2,SIGNHIGH,TFT_GREEN);
+      M5.Lcd.fillRect(signalpos, bandposy, 2, SIGNHIGH, TFT_GREEN);
     signalpos = signalpos + 2;
   };
   void onBufferMsg(const char* msg) {
     Serial.println(msg);
     signalpos = SIGNMARG;
-    if (String(msg)=="EoM"){
-      M5.Lcd.fillRect(SIGNMARG, bandposy, 121, SIGNHIGH, BLACK);
+    M5.Lcd.setTextSize(2);
+    if (String(msg) == "EoM") {
+      updateField(INFOMARG, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_RED);
+      M5.Lcd.printf("B:%s", msg);
+      updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_CYAN);
+      M5.Lcd.printf("P:Ukn");
+      printStatus("Decoding..");
       bandposy = SIGNPOSY;
-    }
-    else {
+    } else if (String(msg) == "BF") {
+      updateField(INFOMARG, INFOPOSY+DATEHIGH+6, TFT_WIDTH, DATEHIGH, TFT_WHITE);
+      M5.Lcd.printf("B:%s", msg);
+      updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+7, 60, DATEHIGH, TFT_GREEN);
+      M5.Lcd.printf("P:Ok");
       bandposy = bandposy + SIGNHIGH + 3;
+      if (bandposy >= (SIGNPOSY + (SIGNHIGH + 3) * MAXBANDS)) {
+        bandposy = SIGNPOSY;
+      }
     }
+    M5.Lcd.fillRect(SIGNMARG, bandposy, 121, SIGNHIGH, BLACK);
   };
-  void onGetTime(){
-
+  void onTimeUpdateMsg(const char* msg){
+    printStatus(msg);
   };
-  void onParityError(){
-
+  void onParityError() {
+    updateField(TFT_WIDTH - 60, INFOPOSY+DATEHIGH+6, 60, DATEHIGH, TFT_CYAN);
+    M5.Lcd.printf("P:Err");
   };
 };
 
@@ -63,33 +94,13 @@ void displayLoop() {
     tts = millis(); 
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(DATEPOSX, DATEPOSY);
+    M5.Lcd.setTextColor(TFT_WHITE);
     M5.Lcd.fillRect(DATEPOSX, DATEPOSY, 60, DATEHIGH, BLACK);
     M5.Lcd.print(year());
     M5.Lcd.setCursor(DATEMARG, DATEPOSY+DATEHIGH);
     M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH, M5.Lcd.width() - DATEMARG, DATEHIGH, BLACK);
     M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
   }
-}
-
-void setup() {
-  Serial.begin(115200);
-  M5.begin();
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setTextColor(WHITE);
-  M5.Axp.ScreenBreath(backlight[brightness]);
-
-  delay(200);
-  Serial.flush();
-  // Configure DCF77
-  // (LOW = Normal operation, HIGH = standby)
-  pinMode(DCF77_PON_PIN, OUTPUT);
-  digitalWrite(DCF77_PON_PIN, LOW);
-
-  DCF.setCallBack(new mDCF77EventsCallback());
-  DCF.Start();
-  Serial.println("Waiting for DCF77 time ... ");
-  Serial.println("It will take at least 2 minutes until a first update can be processed.");
-  delay(100);
 }
 
 void dfcLoop() {
@@ -100,8 +111,36 @@ void dfcLoop() {
     if (DCFtime != 0) {
       Serial.println("Time is updated");
       setTime(DCFtime);
+      M5.Lcd.setTextSize(2);
+      updateField(DATEMARG, DATEPOSY+DATEHIGH*2, M5.Lcd.width() - DATEMARG, DATEHIGH, TFT_YELLOW);
+      M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second()); 
     }
   }
+}
+
+void setup() {
+  Serial.begin(115200);
+  M5.begin();
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.drawLine(0,DATEPOSY+DATEHIGH*3+2,TFT_WHITE,DATEPOSY+DATEHIGH*2+2,TFT_WHITE);
+
+  M5.Axp.ScreenBreath(backlight[brightness]);
+
+  delay(200);
+  Serial.flush();
+  
+  // Configure DCF77
+  // (LOW = Normal operation, HIGH = standby)
+  pinMode(DCF77_PON_PIN, OUTPUT);
+  digitalWrite(DCF77_PON_PIN, LOW);
+
+  DCF.setCallBack(new mDCF77EventsCallback());
+  DCF.Start();
+  Serial.println("Waiting for DCF77 time ... ");
+  Serial.println("It will take at least 2 minutes until a first update can be processed.");
+  delay(100);
+  printStatus("Decoding..");
 }
 
 void buttonLoop(){
