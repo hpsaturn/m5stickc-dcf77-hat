@@ -59,29 +59,38 @@ void printParity(const char* msg, uint16_t color) {
 
 void printYear() {
   M5.Lcd.setTextSize(2);
-  updateField(DATEMARG, DATEPOSY, M5.Lcd.width() - DATEMARG, DATEHIGH, TFT_WHITE);
   M5.Lcd.setTextDatum(TC_DATUM);
   M5.Lcd.drawString(String(year()), TFT_WIDTH/2, DATEPOSY);
 }
 
-void printTime(int32_t posy, uint16_t color) {
+void printTime() {
   M5.Lcd.setTextSize(2);
-  updateField(DATEMARG, posy, M5.Lcd.width() - DATEMARG, DATEHIGH, color);
+  M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH, TFT_WIDTH-DATEMARG, DATEHIGH, BLACK);
+  M5.Lcd.setCursor(DATEMARG,DATEPOSY+DATEHIGH);
+  M5.Lcd.setTextColor(TFT_WHITE);
   M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
 }
 
-void printDigits(int digits){
+void printLastTimeUpdate() {
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH*2, TFT_WIDTH-DATEMARG, DATEHIGH, BLACK);
+  M5.Lcd.setCursor(DATEMARG,DATEPOSY+DATEHIGH*2);
+  M5.Lcd.setTextColor(TFT_YELLOW);
+  M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
+}
+
+void serialPrintDigits(int digits){
   // utility function for digital clock display: prints preceding colon and leading 0
   Serial.print(":");
   if(digits < 10) Serial.print('0');
   Serial.print(digits);
 }
 
-void printClock() {
+void serialPrintClock() {
   // digital clock display of the time
   Serial.print(hour());
-  printDigits(minute());
-  printDigits(second());
+  serialPrintDigits(minute());
+  serialPrintDigits(second());
   Serial.print(" ");
   Serial.print(day());
   Serial.print(" ");

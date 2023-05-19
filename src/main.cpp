@@ -65,10 +65,10 @@ void dcfLoop() {
     if (DCFtime != 0) {
       Serial.println("Time is updated");
       setTime(DCFtime);
-      printTime(DATEPOSY + DATEHIGH * 2, TFT_YELLOW);
+      printLastTimeUpdate();
     }
     printYear();
-    printTime(DATEPOSY + DATEHIGH, TFT_WHITE);
+    printTime();
   }
 }
 
