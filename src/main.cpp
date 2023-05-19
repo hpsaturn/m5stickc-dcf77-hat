@@ -63,9 +63,10 @@ void dcfLoop() {
     tts = millis();
     time_t DCFtime = DCF.getTime();  // Check if new DCF77 time is available
     if (DCFtime != 0) {
-      Serial.println("Time is updated");
+      Serial.printf("\rTime is updated: ");
       setTime(DCFtime);
       printLastTimeUpdate();
+      serialPrintClock();
     }
     printYear();
     printTime();

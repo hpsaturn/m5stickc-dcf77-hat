@@ -79,23 +79,6 @@ void printLastTimeUpdate() {
   M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
 }
 
-void serialPrintDigits(int digits){
-  // utility function for digital clock display: prints preceding colon and leading 0
-  Serial.print(":");
-  if(digits < 10) Serial.print('0');
-  Serial.print(digits);
-}
-
 void serialPrintClock() {
-  // digital clock display of the time
-  Serial.print(hour());
-  serialPrintDigits(minute());
-  serialPrintDigits(second());
-  Serial.print(" ");
-  Serial.print(day());
-  Serial.print(" ");
-  Serial.print(month());
-  Serial.print(" ");
-  Serial.print(year());
-  Serial.println();
+  Serial.printf("%02d:%02d:%02d %02d.%02d.%02d\r\n", hour(), minute(), second(), year(), month(), day());
 }

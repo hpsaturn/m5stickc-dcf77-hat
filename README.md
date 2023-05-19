@@ -36,7 +36,7 @@ The current firmware was tested on 77.5KHZ single frequency device. It is the 4 
 
 Is a basic box - hat for these devices, for example M5StickC or M5StickC-Plus, also should be work in M5CoreInk device.
 
-![Box DCF77 M5StickCPlus Hat](box/collage.jpg)
+[![Box DCF77 M5StickCPlus Hat](box/collage.jpg)](https://youtu.be/C50qMhYiE60)
 
 **Files:**  
 
