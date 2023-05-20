@@ -60,12 +60,12 @@ void printParity(const char* msg, uint16_t color) {
 void printYear() {
   M5.Lcd.setTextSize(2);
   M5.Lcd.setTextDatum(TC_DATUM);
+  M5.Lcd.fillRect(DATEMARG, DATEPOSY, TFT_WIDTH-DATEMARG, DATEHIGH*2, BLACK);
   M5.Lcd.drawString(String(year()), TFT_WIDTH/2, DATEPOSY);
 }
 
 void printTime() {
   M5.Lcd.setTextSize(2);
-  M5.Lcd.fillRect(DATEMARG, DATEPOSY+DATEHIGH, TFT_WIDTH-DATEMARG, DATEHIGH, BLACK);
   M5.Lcd.setCursor(DATEMARG,DATEPOSY+DATEHIGH);
   M5.Lcd.setTextColor(TFT_WHITE);
   M5.Lcd.printf("%02d:%02d:%02d", hour(), minute(), second());
