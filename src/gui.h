@@ -60,7 +60,7 @@ void printParity(const char* msg, uint16_t color) {
 void printYear() {
   M5.Lcd.setTextSize(2);
   M5.Lcd.setTextDatum(TC_DATUM);
-  M5.Lcd.fillRect(DATEMARG, DATEPOSY, TFT_WIDTH-DATEMARG, DATEHIGH*2, BLACK);
+  M5.Lcd.fillRect(0, DATEPOSY, TFT_WIDTH, DATEHIGH*2, BLACK);
   M5.Lcd.drawString(String(year()), TFT_WIDTH/2, DATEPOSY);
 }
 
