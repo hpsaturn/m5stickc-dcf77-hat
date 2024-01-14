@@ -90,7 +90,7 @@ publish_release () {
   COMMIT_LOG=`git log -1 --format='%ci %H %s'`
   git tag -a "${SRC_VER}" -m "release v${SRC_VER}"
   git push origin "${SRC_VER}"
-  git log -n 10 --pretty=format:"%h %s" | gh release create "v${SRC_VER}" -F - -t "${SRC_VER}" -p ${OUTPUT} 
+  git log -n 10 --pretty=format:"%h %s" | gh release create "${SRC_VER}" -F - -t "${SRC_VER}" -p ${OUTPUT} 
   echo ""
   echo "***********************************************"
   echo "*************     done    *********************" 
