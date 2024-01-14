@@ -66,9 +66,10 @@ build () {
     cp $dir/firmware.bin "tmp/${flavor}_firmware.bin"
     cp $dir/partitions.bin "tmp/${flavor}_partitions.bin"
   done
-  zip -r ../../${OUTPUT} tmp/*.bin
-  rm -r tmp
-  cd ../..
+  cd tmp
+  zip -r ../../../${OUTPUT} *.bin
+  cd ../../..
+  rm -r $BUILD_DIR/tmp
   echo ""
   echo "***********************************************"
   echo "************** Build done *********************" 
