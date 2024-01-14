@@ -1,6 +1,16 @@
+[![PlatformIO](https://github.com/hpsaturn/m5stickc-dcf77-hat/workflows/PlatformIO/badge.svg)](https://github.com/hpsaturn/m5stickc-dcf77-hat/actions/)
+
 # M5StickC DCF77 HAT
 
 Basic hat implementation of a DCF77 receiver for M5StickC-Plus or compatible ESP32 devices. This firmware uses a improvement of Arduino-DCF77 library, it is using events callback to improve the GUI and signal representation.
+
+<table>
+	<tr>
+		<td>
+			Don't forget to star ⭐ this repository
+		</td>
+	</tr>
+</table>
 
 ## Device
 
